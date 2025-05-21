@@ -1,0 +1,17 @@
+bin/
+obj/
+
+.vs/
+.vscode/
+
+*.user
+*.suo
+launchSettings.json
+
+appsettings.Development.json
+secrets.json
+
+.idea/
+
+.DS_Store
+Thumbs.db
