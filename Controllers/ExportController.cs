@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using OfficeOpenXml;
-using Rotativa.AspNetCore;
-using RotativaDemo.Data;
-using RotativaDemo.Models;
+using OfficeOpenXml;          
+using Rotativa.AspNetCore;        
+using RotativaDemo.Data;          
+using RotativaDemo.Models;        
 
 namespace RotativaDemo.Controllers
 {
@@ -21,23 +21,25 @@ namespace RotativaDemo.Controllers
         }
 
         [HttpGet("excel")]
-        public async Task<IActionResult> ExcelAsync()
+        public async Task<IActionResult> Excel()
         {
-            ExcelPackage.License = License.NonCommercial;
+            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
 
             IEnumerable<StudentScore> scores = _scoreRepository.GetAllScores();
 
-            await using var package = new ExcelPackage();
-            var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+            using var package   = new ExcelPackage();
+            var worksheet       = package.Workbook.Worksheets.Add("Scores");
 
             BuildExcelHeader(worksheet);
             FillExcelData(worksheet, scores);
 
-            var stream = new MemoryStream();
+            using var stream    = new MemoryStream();
             await package.SaveAsAsync(stream);
-            stream.Position = 0;
 
-            string fileName = $"scores_{DateTime.Now:yyyyMMdd}.xlsx";
+            stream.Position     = 0;
+
+            string fileName     = $"scores_{DateTime.Now:yyyyMMdd}.xlsx";
+
             return File(
                 stream,
                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -52,13 +54,14 @@ namespace RotativaDemo.Controllers
 
             return new ViewAsPdf("PdfView", scores)
             {
-                FileName = $"scores_{DateTime.Now:yyyyMMdd}.pdf",
-                PageSize = Rotativa.AspNetCore.Options.Size.A4,
+                FileName        = $"scores_{DateTime.Now:yyyyMMdd}.pdf",
+                PageSize        = Rotativa.AspNetCore.Options.Size.A4,
                 PageOrientation = Rotativa.AspNetCore.Options.Orientation.Portrait
             };
         }
 
-        #region Helpers: Excel layout
+        #region Excel Helpers
+
         private static void BuildExcelHeader(ExcelWorksheet sheet)
         {
             sheet.Cells[1, 1].Value = "Rank";
@@ -67,9 +70,11 @@ namespace RotativaDemo.Controllers
             sheet.Row(1).Style.Font.Bold = true;
         }
 
-        private static void FillExcelData(ExcelWorksheet sheet, IEnumerable<StudentScore> data)
+        private static void FillExcelData(
+            ExcelWorksheet sheet,
+            IEnumerable<StudentScore> data)
         {
-            int row = 2;
+            var row = 2;
             foreach (var item in data)
             {
                 sheet.Cells[row, 1].Value = item.Rank;
@@ -78,7 +83,7 @@ namespace RotativaDemo.Controllers
                 row++;
             }
         }
-        
+
         #endregion
     }
 }

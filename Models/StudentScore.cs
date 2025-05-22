@@ -1,19 +1,22 @@
-public class StudentScore
+namespace RotativaDemo.Models
 {
-    public int Id
+    public class StudentScore
     {
-        get; set;
-    }
-    public string Name
-    {
-        get; set;
-    }
-    public int Score
-    {
-        get; set;
-    }
-    public int Rank
-    {
-        get; set;
+        public int Id
+        {
+            get; set;
+        }
+        public string Name
+        {
+            get; set;
+        } = string.Empty; 
+        public int Score
+        {
+            get; set;
+        }
+        public int Rank
+        {
+            get; set;
+        }
     }
 }

@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using System.Data;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;         
 using Microsoft.Extensions.Configuration;
 using RotativaDemo.Models;
 
@@ -12,13 +12,14 @@ namespace RotativaDemo.Data
 
         public ScoreRepository(IConfiguration config)
         {
-            _connString = config.GetConnectionString("DefaultConnection");
+            _connString = config
+                .GetConnectionString("DefaultConnection")
+                ?? throw new InvalidOperationException("Missing connection string");
         }
 
         public IEnumerable<StudentScore> GetAllScores()
         {
             var list = new List<StudentScore>();
-
             using var conn = new SqlConnection(_connString);
             using var cmd  = new SqlCommand("sp_GetStudentScores", conn)
             {

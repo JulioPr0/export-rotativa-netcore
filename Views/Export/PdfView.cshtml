@@ -1,12 +1,12 @@
+@using RotativaDemo.Models
+@model IEnumerable<StudentScore>
+
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <meta charset="utf-8" />
-    <title>Laporan Data</title>
-    <style>
-        table { width:100%; border-collapse: collapse; }
-        th, td { border: 1px solid #333; padding: 5px; text-align: left; }
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Julio Pramaitama</title>
 </head>
 <body>
     <h2>Laporan Data</h2>
@@ -19,11 +19,37 @@
             </tr>
         </thead>
         <tbody>
-            <tr><td>1</td><td>Julio</td><td>95</td></tr>
-            <tr><td>2</td><td>Hoiluj</td><td>90</td></tr>
-            <tr><td>3</td><td>永城</td><td>90</td></tr>
+        @if (Model != null && Model.Any())
+        {
+            foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.Rank</td>
+                    <td>@item.Name</td>
+                    <td>@item.Score</td>
+                </tr>
+            }
+        } else
+        {
+            <tr>
+                <td colspan="3" style="text-align:center;">Tidak ada data</td>
+            </tr>
+        }
         </tbody>
     </table>
-    
 </body>
+
+<style>
+    table { 
+        width:100%; border-collapse: collapse; font-family: Arial, sans-serif; 
+    }
+    th, td { 
+        border: 1px solid #333; padding: 5px; text-align: left; 
+    }
+    th { 
+        background-color: #f0f0f0; 
+    }
+    
+</style>
+
 </html>
