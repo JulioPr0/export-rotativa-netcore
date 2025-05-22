@@ -6,11 +6,15 @@ namespace RotativaDemo.Models
         {
             get; set;
         }
-        public string Name
+        public int No
+        {
+            get; set;
+        }
+        public string Nama
         {
             get; set;
         } = string.Empty; 
-        public int Score
+        public int Nilai
         {
             get; set;
         }

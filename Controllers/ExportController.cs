@@ -24,28 +24,22 @@ namespace RotativaDemo.Controllers
         public async Task<IActionResult> Excel()
         {
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+            var scores = _scoreRepository.GetAllScores();
 
-            IEnumerable<StudentScore> scores = _scoreRepository.GetAllScores();
+            using var package = new ExcelPackage();
+            var ws = package.Workbook.Worksheets.Add("Sheet1");
+            BuildExcelHeader(ws);
+            FillExcelData(ws, scores);
 
-            using var package   = new ExcelPackage();
-            var worksheet       = package.Workbook.Worksheets.Add("Scores");
-
-            BuildExcelHeader(worksheet);
-            FillExcelData(worksheet, scores);
-
-            using var stream    = new MemoryStream();
+            var stream = new MemoryStream();
             await package.SaveAsAsync(stream);
+            stream.Position = 0;
 
-            stream.Position     = 0;
-
-            string fileName     = $"scores_{DateTime.Now:yyyyMMdd}.xlsx";
-
-            return File(
-                stream,
-                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                fileName
-            );
+            return File(stream,
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                        $"data_{DateTime.Now:yyyyMMdd}.xlsx");
         }
+
 
         [HttpGet("pdf")]
         public IActionResult Pdf()
@@ -54,7 +48,7 @@ namespace RotativaDemo.Controllers
 
             return new ViewAsPdf("PdfView", scores)
             {
-                FileName        = $"scores_{DateTime.Now:yyyyMMdd}.pdf",
+                FileName        = $"laporan_{DateTime.Now:yyyyMMdd}.pdf",
                 PageSize        = Rotativa.AspNetCore.Options.Size.A4,
                 PageOrientation = Rotativa.AspNetCore.Options.Orientation.Portrait
             };
@@ -64,9 +58,9 @@ namespace RotativaDemo.Controllers
 
         private static void BuildExcelHeader(ExcelWorksheet sheet)
         {
-            sheet.Cells[1, 1].Value = "Rank";
-            sheet.Cells[1, 2].Value = "Name";
-            sheet.Cells[1, 3].Value = "Score";
+            sheet.Cells[1, 1].Value = "No";     
+            sheet.Cells[1, 2].Value = "Nama";   
+            sheet.Cells[1, 3].Value = "Nilai";   
             sheet.Row(1).Style.Font.Bold = true;
         }
 
@@ -77,9 +71,9 @@ namespace RotativaDemo.Controllers
             var row = 2;
             foreach (var item in data)
             {
-                sheet.Cells[row, 1].Value = item.Rank;
-                sheet.Cells[row, 2].Value = item.Name;
-                sheet.Cells[row, 3].Value = item.Score;
+                sheet.Cells[row, 1].Value = item.No;
+                sheet.Cells[row, 2].Value = item.Nama;
+                sheet.Cells[row, 3].Value = item.Nilai;
                 row++;
             }
         }
