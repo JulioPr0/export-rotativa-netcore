@@ -1,4 +1,5 @@
 using Rotativa.AspNetCore;
+using RotativaDemo.Data;
 
 OfficeOpenXml.ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
 
@@ -8,6 +9,9 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
+builder.Services.AddScoped<IScoreRepository, ScoreRepository>();
+
+builder.Services.AddControllersWithViews();
 var app = builder.Build();
 
 RotativaConfiguration.Setup(

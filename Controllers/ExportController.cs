@@ -1,39 +1,43 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using OfficeOpenXml;         
+using OfficeOpenXml;
 using Rotativa.AspNetCore;
+using RotativaDemo.Data;
+using RotativaDemo.Models;
 
 namespace RotativaDemo.Controllers
 {
+    [Route("export")]
     public class ExportController : Controller
     {
-        [HttpGet("/export/excel")]
-        public async Task<IActionResult> Excel()
+        private readonly IScoreRepository _scoreRepository;
+
+        public ExportController(IScoreRepository scoreRepository)
         {
-            using var package = new ExcelPackage();
-            var sheet = package.Workbook.Worksheets.Add("Sheet1");
+            _scoreRepository = scoreRepository;
+        }
 
-            sheet.Cells[1, 1].Value = "No";
-            sheet.Cells[1, 2].Value = "Nama";
-            sheet.Cells[1, 3].Value = "Nilai";
+        [HttpGet("excel")]
+        public async Task<IActionResult> ExcelAsync()
+        {
+            ExcelPackage.License = License.NonCommercial;
 
-            var data = new[]
-            {
-                new { No = 1, Nama = "Julio", Nilai = 95 },
-                new { No = 2, Nama = "Hoiluj", Nilai = 90 },
-                new { No = 3, Nama = "永城", Nilai = 90 }
-            };
-            for (int i = 0; i < data.Length; i++)
-            {
-                sheet.Cells[i + 2, 1].Value = data[i].No;
-                sheet.Cells[i + 2, 2].Value = data[i].Nama;
-                sheet.Cells[i + 2, 3].Value = data[i].Nilai;
-            }
+            IEnumerable<StudentScore> scores = _scoreRepository.GetAllScores();
 
-            var stream = new MemoryStream(); 
+            await using var package = new ExcelPackage();
+            var worksheet = package.Workbook.Worksheets.Add("Sheet1");
+
+            BuildExcelHeader(worksheet);
+            FillExcelData(worksheet, scores);
+
+            var stream = new MemoryStream();
             await package.SaveAsAsync(stream);
             stream.Position = 0;
 
-            string fileName = $"data_{DateTime.Now:yyyyMMdd}.xlsx";
+            string fileName = $"scores_{DateTime.Now:yyyyMMdd}.xlsx";
             return File(
                 stream,
                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -41,15 +45,40 @@ namespace RotativaDemo.Controllers
             );
         }
 
-        [HttpGet("/export/pdf")]
+        [HttpGet("pdf")]
         public IActionResult Pdf()
         {
-            return new ViewAsPdf("PdfView")
+            var scores = _scoreRepository.GetAllScores();
+
+            return new ViewAsPdf("PdfView", scores)
             {
-                FileName = $"Laporan_{DateTime.Now:yyyyMMdd}.pdf",
+                FileName = $"scores_{DateTime.Now:yyyyMMdd}.pdf",
                 PageSize = Rotativa.AspNetCore.Options.Size.A4,
                 PageOrientation = Rotativa.AspNetCore.Options.Orientation.Portrait
             };
         }
+
+        #region Helpers: Excel layout
+        private static void BuildExcelHeader(ExcelWorksheet sheet)
+        {
+            sheet.Cells[1, 1].Value = "Rank";
+            sheet.Cells[1, 2].Value = "Name";
+            sheet.Cells[1, 3].Value = "Score";
+            sheet.Row(1).Style.Font.Bold = true;
+        }
+
+        private static void FillExcelData(ExcelWorksheet sheet, IEnumerable<StudentScore> data)
+        {
+            int row = 2;
+            foreach (var item in data)
+            {
+                sheet.Cells[row, 1].Value = item.Rank;
+                sheet.Cells[row, 2].Value = item.Name;
+                sheet.Cells[row, 3].Value = item.Score;
+                row++;
+            }
+        }
+        
+        #endregion
     }
 }
