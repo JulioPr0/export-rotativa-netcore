@@ -17,3 +17,5 @@ secrets.json
 Thumbs.db
 
 docker-compose.yml
+
+appsettings.json
