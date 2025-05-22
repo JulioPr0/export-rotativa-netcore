@@ -46,7 +46,7 @@ namespace RotativaDemo.Controllers
         {
             return new ViewAsPdf("PdfView")
             {
-                FileName = $"Laporan_{DateTime.Now:yyyyMMdd}.pdf",
+                FileName = $"laporan_{DateTime.Now:yyyyMMdd}.pdf",
                 PageSize = Rotativa.AspNetCore.Options.Size.A4,
                 PageOrientation = Rotativa.AspNetCore.Options.Orientation.Portrait
             };
